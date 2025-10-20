@@ -1,11 +1,29 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/feed");
+    }
+  }, [user, navigate]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10">
+      <div className="text-center p-8">
+        <div className="text-6xl mb-4">📚</div>
+        <h1 className="text-4xl font-bold mb-2">StudySnap</h1>
+        <p className="text-muted-foreground mb-6">
+          Learn tech through short videos
+        </p>
+        <Button size="lg" onClick={() => navigate("/auth")}>
+          Get Started
+        </Button>
       </div>
     </div>
   );

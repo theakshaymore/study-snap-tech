@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Video, Image, Type, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,26 +6,93 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Create = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleCreate = () => {
-    if (!title) {
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 100 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select a video under 100MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      setVideoFile(file);
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!title || !videoFile || !category || !user) {
       toast({
-        title: "Title required",
-        description: "Please add a title for your video",
+        title: "Missing information",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
     }
-    
-    toast({
-      title: "Video created!",
-      description: "Your study reel has been published",
-    });
+
+    setUploading(true);
+
+    try {
+      const fileExt = videoFile.name.split(".").pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("videos")
+        .upload(fileName, videoFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("videos")
+        .getPublicUrl(fileName);
+
+      const { error: dbError } = await supabase.from("videos").insert({
+        user_id: user.id,
+        title,
+        description,
+        category,
+        video_url: publicUrl,
+      });
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Video created!",
+        description: "Your study reel has been published",
+      });
+
+      navigate("/feed");
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -33,17 +100,33 @@ const Create = () => {
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="p-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Create</h1>
-          <Button onClick={handleCreate}>Publish</Button>
+          <Button onClick={handleCreate} disabled={uploading}>
+            {uploading ? "Uploading..." : "Publish"}
+          </Button>
         </div>
       </div>
 
       <div className="p-4 space-y-4">
         {/* Video Upload */}
         <Card className="p-6">
-          <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-lg border-border hover:border-primary transition-colors cursor-pointer">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/mp4,video/quicktime,video/webm"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-lg border-border hover:border-primary transition-colors cursor-pointer"
+          >
             <Video className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-sm font-medium mb-1">Upload your video</p>
-            <p className="text-xs text-muted-foreground">Max 60 seconds, MP4 or MOV</p>
+            <p className="text-sm font-medium mb-1">
+              {videoFile ? videoFile.name : "Upload your video"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Max 100MB, MP4, MOV, or WEBM
+            </p>
           </div>
         </Card>
 
@@ -75,7 +158,12 @@ const Create = () => {
               <Label>Category</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {["React", "JavaScript", "Python", "CSS", "AI/ML", "Web3"].map((cat) => (
-                  <Button key={cat} variant="outline" size="sm">
+                  <Button
+                    key={cat}
+                    variant={category === cat ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCategory(cat)}
+                  >
                     {cat}
                   </Button>
                 ))}
