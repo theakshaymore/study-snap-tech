@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,6 +88,15 @@ const Feed = () => {
           playsInline
           controls={false}
         />
+
+        {/* Create Button FAB */}
+        <Button
+          size="icon"
+          className="fixed top-4 right-4 z-20 rounded-full h-12 w-12 shadow-lg"
+          onClick={() => navigate("/create")}
+        >
+          <PlusCircle className="h-6 w-6" />
+        </Button>
 
         {/* Right Side Actions */}
         <div className="absolute right-4 bottom-24 flex flex-col gap-6">

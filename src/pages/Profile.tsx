@@ -10,7 +10,7 @@ const Profile = () => {
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="p-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Profile</h1>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={() => window.location.href = "/settings"}>
             <Settings className="h-5 w-5" />
           </Button>
         </div>

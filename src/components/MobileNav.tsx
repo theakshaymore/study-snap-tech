@@ -7,9 +7,8 @@ const MobileNav = () => {
   const location = useLocation();
 
   const navItems = [
-    { icon: Home, label: "Home", path: "/" },
+    { icon: Home, label: "Feed", path: "/feed" },
     { icon: Search, label: "Discover", path: "/discover" },
-    { icon: PlusCircle, label: "Create", path: "/create" },
     { icon: User, label: "Profile", path: "/profile" },
   ];
 

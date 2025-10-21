@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Video, Image, Type, Sparkles } from "lucide-react";
+import { Video, Image, Type, Sparkles, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -99,7 +99,16 @@ const Create = () => {
     <div className="min-h-screen bg-background pb-20">
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="p-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Create</h1>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate("/feed")}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold">Create</h1>
+          </div>
           <Button onClick={handleCreate} disabled={uploading}>
             {uploading ? "Uploading..." : "Publish"}
           </Button>
