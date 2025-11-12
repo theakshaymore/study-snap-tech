@@ -1,36 +1,56 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useGoogleAuth } from "@/hooks/useGoogleAuth";
-import { Separator } from "@/components/ui/separator";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signInWithGoogle } = useGoogleAuth();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/feed");
+        // Check if user has a username
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profile?.username) {
+          navigate("/feed");
+        } else {
+          navigate("/username");
+        }
       }
-    });
+    };
+    checkAuth();
   }, [navigate]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      await signInWithGoogle();
-      navigate("/feed");
+      const result = await signInWithGoogle();
+      if (result) {
+        // Check if user has a username
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", result.user.id)
+          .single();
+
+        if (profile?.username) {
+          navigate("/feed");
+        } else {
+          navigate("/username");
+        }
+      }
     } catch (error) {
       // Error already handled in useGoogleAuth
     } finally {
@@ -38,60 +58,23 @@ const Auth = () => {
     }
   };
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        navigate("/feed");
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/feed`,
-          },
-        });
-        if (error) throw error;
-        toast({
-          title: "Account created!",
-          description: "You can now start creating study reels.",
-        });
-        navigate("/feed");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md p-8 space-y-6">
         <div className="text-center space-y-2">
-          <div className="text-4xl mb-4">📚</div>
-          <h1 className="text-3xl font-bold">StudySnap</h1>
-          <p className="text-muted-foreground">
-            Learn tech through short videos
+          <div className="text-4xl mb-4">🧠</div>
+          <h1 className="text-3xl font-bold">ROTT</h1>
+          <p className="text-muted-foreground text-lg mt-2">
+            Brain rot, but in a good way
           </p>
         </div>
 
         <Button 
           onClick={handleGoogleSignIn} 
           disabled={loading}
-          variant="outline"
+          variant="default"
           className="w-full"
+          size="lg"
         >
           <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -101,56 +84,6 @@ const Auth = () => {
           </svg>
           {loading ? "Signing in..." : "Continue with Google"}
         </Button>
-
-        <div className="relative">
-          <Separator />
-          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-            Or continue with email
-          </span>
-        </div>
-
-        <form onSubmit={handleAuth} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
-          </Button>
-        </form>
-
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            {isLogin
-              ? "Don't have an account? Sign up"
-              : "Already have an account? Sign in"}
-          </button>
-        </div>
       </Card>
     </div>
   );

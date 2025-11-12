@@ -6,11 +6,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Username from "./pages/Username";
 import Feed from "./pages/Feed";
 import Discover from "./pages/Discover";
 import Create from "./pages/Create";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import Gamification from "./pages/Gamification";
 import NotFound from "./pages/NotFound";
 import MobileNav from "./components/MobileNav";
 
@@ -26,8 +28,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/username" element={<Username />} />
             <Route path="/feed" element={<><Feed /><MobileNav /></>} />
             <Route path="/discover" element={<><Discover /><MobileNav /></>} />
+            <Route path="/gamification" element={<><Gamification /><MobileNav /></>} />
             <Route path="/create" element={<Create />} />
             <Route path="/profile" element={<><Profile /><MobileNav /></>} />
             <Route path="/settings" element={<Settings />} />

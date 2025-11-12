@@ -24,7 +24,7 @@ const Settings = () => {
   };
 
   const handleFeedback = () => {
-    window.location.href = "mailto:feedback@studysnap.app?subject=StudySnap Feedback";
+    window.location.href = "mailto:feedback@rott.app?subject=ROTT Feedback";
   };
 
   return (
@@ -49,7 +49,7 @@ const Settings = () => {
           <div>
             <h2 className="text-lg font-semibold mb-1">Appearance</h2>
             <p className="text-sm text-muted-foreground">
-              Choose how StudySnap looks to you
+              Choose how ROTT looks to you
             </p>
           </div>
 

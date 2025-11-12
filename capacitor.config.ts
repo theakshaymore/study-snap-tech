@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.deabd80c5f17476f9b9ffbfd64598b4d',
-  appName: 'study-snap-tech',
+  appName: 'ROTT',
   webDir: 'dist',
   server: {
     url: 'https://deabd80c-5f17-476f-9b9f-fbfd64598b4d.lovableproject.com?forceHideBadge=true',

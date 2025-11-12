@@ -1,4 +1,4 @@
-import { Home, Search, PlusCircle, User } from "lucide-react";
+import { Home, Search, Trophy, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -7,8 +7,9 @@ const MobileNav = () => {
   const location = useLocation();
 
   const navItems = [
-    { icon: Home, label: "Feed", path: "/feed" },
-    { icon: Search, label: "Discover", path: "/discover" },
+    { icon: Home, label: "Home", path: "/feed" },
+    { icon: Search, label: "Feed", path: "/discover" },
+    { icon: Trophy, label: "Game", path: "/gamification" },
     { icon: User, label: "Profile", path: "/profile" },
   ];
 
