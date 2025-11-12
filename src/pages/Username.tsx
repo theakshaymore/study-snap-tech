@@ -27,7 +27,7 @@ const Username = () => {
         .from("profiles")
         .select("username")
         .eq("username", username)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         toast({
