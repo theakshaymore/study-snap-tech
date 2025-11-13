@@ -8,9 +8,20 @@ export const useGoogleAuth = () => {
 
   const signInWithGoogle = async () => {
     try {
-      // Initialize GoogleAuth for native platforms
+      // Initialize GoogleAuth per platform
       if (Capacitor.isNativePlatform()) {
         await GoogleAuth.initialize();
+      } else {
+        // Ensure web client ID is set for web initialization
+        const webClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+        if (!webClientId) {
+          throw new Error("Missing Google OAuth client ID. Please set VITE_GOOGLE_CLIENT_ID.");
+        }
+        await GoogleAuth.initialize({
+          clientId: webClientId,
+          scopes: ['profile', 'email'],
+          grantOfflineAccess: true,
+        });
       }
 
       const result = await GoogleAuth.signIn();
